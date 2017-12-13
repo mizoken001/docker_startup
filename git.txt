@@ -4,6 +4,7 @@ yum -y install git
 git config --global http.proxy http://proxy.toshiba.co.jp:8080/
 git config --global https.proxy http://proxy.toshiba.co.jp:8080/
 git config --global url."https://".insteadOf git://
+git config --global credential.helper cache
 
 git config --global user.email "mizo.ken001@gmail.com"
 git config --global user.name "mizoken001"
