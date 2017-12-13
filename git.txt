@@ -1,0 +1,43 @@
+yum -y install git
+
+# git
+git config --global http.proxy http://proxy.toshiba.co.jp:8080/
+git config --global https.proxy http://proxy.toshiba.co.jp:8080/
+git config --global url."https://".insteadOf git://
+
+git config --global user.email "mizo.ken001@gmail.com"
+git config --global user.name "mizoken001"
+git config --global push.default simple
+
+
+cd <My_Project_dir>
+
+git init
+git status
+
+echo "# aas" >> README.md
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/mizoken001/aas.git
+git push -u origin master
+
+
+git add <file>...
+git commit
+git reset HEAD <file>...
+
+git log
+git show
+git diff <from commit hash> <to commit hash>
+
+git branch
+git checkout -b <branch name>
+git checkout <branch name>
+git branch -d <branch name>
+git marge <branch name> --no-ff
+git log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset' --date=short
+git --global alias.graph "log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset' --date=short"
+
+git config --global push.default simple
+git push -u origin master
+

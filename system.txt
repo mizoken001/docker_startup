@@ -1,0 +1,17 @@
+yum -y install net-tools
+yum update
+
+systemctl mask packagekit-offline-update.service
+systemctl mask packagekit.service
+
+nmcli general hostname docker01
+ip link
+ip a
+ip route
+nmcli device
+nmcli connection modify eth0 ipv4.method manual ipv4.addresses 192.168.100.101/24 ipv4.gateway 192.168.100.1
+nmcli connection down eth0
+nmcli connection up eth0
+nmcli device show eth0
+
+reboot

@@ -1,0 +1,19 @@
+systemctl stop firewalld.service
+systemctl mask firewalld.service
+
+yum -y install iptables-services
+systemctl enable iptables.service
+systemctl start iptables.service
+
+yum -y install docker
+
+mkdir /etc/systemd/system/docker.service.d
+cat << [END] >> /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://proxy.toshiba.co.jp:8080/" "HTTPS_PROXY=https://proxy.toshiba.co.jp:8080/" "NO_PROXY=localhost,127.0.0.1,.toshiba-sol.co.jp"
+[END]
+
+systemctl enable docker.service
+systemctl start docker.service
+
+docker info
