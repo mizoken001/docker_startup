@@ -1,6 +1,6 @@
 yum -y install git
 
-# git
+# git init
 git config --global http.proxy http://proxy.toshiba.co.jp:8080/
 git config --global https.proxy http://proxy.toshiba.co.jp:8080/
 git config --global url."https://".insteadOf git://
@@ -22,7 +22,7 @@ git commit -m "first commit"
 git remote add origin https://github.com/mizoken001/aas.git
 git push -u origin master
 
-
+# git used
 git add <file>...
 git commit
 git reset HEAD <file>...
@@ -39,6 +39,5 @@ git marge <branch name> --no-ff
 git log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset' --date=short
 git --global alias.graph "log --graph --date-order --all --pretty=format:'%h %Cred%d %Cgreen%ad %Cblue%cn %Creset' --date=short"
 
-git config --global push.default simple
 git push -u origin master
 
