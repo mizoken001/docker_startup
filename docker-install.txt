@@ -1,0 +1,45 @@
+sudo systemctl stop firewalld.service
+sudo systemctl mask firewalld.service
+
+sudo yum -y install iptables-services
+sudo systemctl enable iptables.service
+sudo systemctl start iptables.service
+
+sudo yum remove docker docker-common docker-selinux docker-engine
+sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+sudo yum-config-manager \
+    --add-repo \
+    https://download.docker.com/linux/centos/docker-ce.repo
+
+sudo yum-config-manager --enable docker-ce-edge
+sudo yum-config-manager --enable docker-ce-test
+
+sudo yum makecache fast
+
+sudo tee /etc/yum.repos.d/docker.repo <<-'EOF'
+[dockerrepo]
+name=Docker Repository
+baseurl=https://yum.dockerproject.org/repo/main/centos/$releasever/
+enabled=1
+gpgcheck=1
+gpgkey=https://yum.dockerproject.org/gpg
+EOF
+
+sudo yum install docker-engine
+
+mkdir /etc/systemd/system/docker.service.d
+cat << [END] >> /etc/systemd/system/docker.service.d/http-proxy.conf
+[Service]
+Environment="HTTP_PROXY=http://proxy.toshiba.co.jp:8080/" "HTTPS_PROXY=https://proxy.toshiba.co.jp:8080/" "NO_PROXY=localhost,127.0.0.1,.toshiba-sol.co.jp"
+[END]
+
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo docker run hello-world
+
+sudo usermod -aG docker <username>
+
+----
+
+curl -L https://github.com/docker/machine/releases/download/v0.7.0/docker-machine-`uname -s`-`uname -m` > /usr/local/bin/docker-machine
+chmod +x /usr/local/bin/docker-machine
