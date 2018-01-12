@@ -1,20 +1,28 @@
-systemctl stop firewalld.service
-systemctl mask firewalld.service
+man docker
+man docker-run
 
-yum -y install iptables-services
-systemctl enable iptables.service
-systemctl start iptables.service
+docker search enakai00
+docker pull -a enakai00/centos
+docker images
 
-yum -y install docker
+docker tag enakai00/centos:centos6 newuser/centos:v6
+docker rmi newuser/centos:v6
 
-mkdir /etc/systemd/system/docker.service.d
-cat << [END] >> /etc/systemd/system/docker.service.d/http-proxy.conf
-[Service]
-Environment="HTTP_PROXY=http://proxy.toshiba.co.jp:8080/" "HTTPS_PROXY=https://proxy.toshiba.co.jp:8080/" "NO_PROXY=localhost,127.0.0.1,.toshiba-sol.co.jp"
-[END]
+docker run -it --name centos01 enakai00/centos:centos6 /bin/bash
+cat /etc/centos-release
+df -h /
+ps -ef
+ifconfig
+route -n
+^pq
 
-systemctl enable docker.service
-systemctl start docker.service
+docker ps
+docker attach centos01
 
-docker info
+vi /etc/yum.conf
+yum -y install httpd
+^pq
+
+docker stop centos01
+docker ps -a
 

@@ -19,7 +19,7 @@ sudo yum-config-manager --enable docker-ce-test
 
 sudo yum makecache fast
 
-yum list docker-ce --showduplicates | sort -r
+sudo yum list docker-ce --showduplicates | sort -r
 
 sudo yum install docker-ce-17.09.1.ce-1.el7.centos
 
@@ -31,9 +31,12 @@ Environment="HTTP_PROXY=http://proxy.toshiba.co.jp:8080/" "HTTPS_PROXY=https://p
 
 sudo systemctl enable docker
 sudo systemctl start docker
-sudo docker run hello-world
+
+docker run hello-world
+docker info
 
 sudo usermod -aG docker <username>
+sudo systemctl stop docker
 
 ----
 
