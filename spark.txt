@@ -1,0 +1,28 @@
+yum search openjdk
+sudo yum install java-1.8.0-openjdk
+sudo yum install java-1.8.0-openjdk-devel
+
+cat >> ~/.bashrc <<END
+# Java
+export JAVA_HOME=/usr/java/default
+export PATH=$JAVA_HOME/bin:$PATH
+
+# hadoop
+export HADOOP_HOME=/opt/hadoop
+export HADOOP_CONF_DIR=${HADOOP_HOME}/etc/hadoop
+export HADOOP_OPTS="$HADOOP_OPTS -Djava.library.path=${HADOOP_HOME}/lib/"
+export HADOOP_COMMON_LIB_NATIVE_DIR="${HADOOP_HOME}/lib/native/"
+export PATH=$PATH:${HADOOP_HOME}/bin
+
+# spark
+export SPARK_HOME=/opt/spark
+export PATH=${SPARK_HOME}/bin:${PATH}
+export SPARK_CONF_DIR=~/spark/conf
+export SPARK_CLASSPATH=.
+
+# scala
+export SCALA_HOME=/opt/scala
+export PATH=${SCALA_HOME}/bin:$PATH
+export JAVA_OPTS="-Dhttp.proxyHost=proxy.toshiba-sol.co.jp -Dhttp.proxyPort=8080 -Dhttps.proxyHost=proxy.toshiba-sol.co.jp -Dhttps.proxyPort=8080"
+
+END

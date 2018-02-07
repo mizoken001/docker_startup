@@ -1,0 +1,16 @@
+yum install -y epel-release
+yum install -y R
+useradd rstudio
+usermod -aG wheel rstudio
+echo 'rstudio' | passwd --stdin rstudio
+
+wget https://download2.rstudio.org/rstudio-server-rhel-1.0.153-x86_64.rpm
+rpm -ivh rstudio-server-rhel-1.0.153-x86_64.rpm
+systemctl status rstudio-server.service
+
+yum install freeglut-devel -y
+
+Sys.setenv("http_proxy"="http://proxy.toshiba.co.jp:8080")
+options(repos=local({ r <- getOption("repos"); r["CRAN"] <- "http://cran.ism.ac.jp"; r }))
+install.packages("rgl")
+
