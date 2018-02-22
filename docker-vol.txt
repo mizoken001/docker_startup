@@ -1,0 +1,335 @@
+$ docker run -it -v /myvol --name container1 busybox /bin/sh
+/ # df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mapper/docker-253:0-1199259-6383c8bf67f4f4c6379d43dd1f6fe165ec8bde9925df398c06aaa478c061cb23
+                      10474496     34992  10439504   0% /
+tmpfs                    65536         0     65536   0% /dev
+tmpfs                  1940700         0   1940700   0% /sys/fs/cgroup
+/dev/mapper/cl-root   52403200   7372744  45030456  14% /myvol
+/dev/mapper/cl-root   52403200   7372744  45030456  14% /etc/resolv.conf
+/dev/mapper/cl-root   52403200   7372744  45030456  14% /etc/hostname
+/dev/mapper/cl-root   52403200   7372744  45030456  14% /etc/hosts
+shm                      65536         0     65536   0% /dev/shm
+tmpfs                    65536         0     65536   0% /proc/kcore
+tmpfs                    65536         0     65536   0% /proc/timer_list
+tmpfs                    65536         0     65536   0% /proc/timer_stats
+tmpfs                    65536         0     65536   0% /proc/sched_debug
+tmpfs                  1940700         0   1940700   0% /proc/scsi
+tmpfs                  1940700         0   1940700   0% /sys/firmware
+/ # echo container1 >> /myvol/container1
+/ # df > /myvol/df
+/ # ls /myvol
+container1  df
+/ # exit
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+local               c554daafe4b231f71864f68601d32c336a3952c87121e768bf501c77d937ec30
+
+$ docker inspect container1
+[
+          :
+
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "c554daafe4b231f71864f68601d32c336a3952c87121e768bf501c77d937ec30",
+                "Source": "/var/lib/docker/volumes/c554daafe4b231f71864f68601d32c336a3952c87121e768bf501c77d937ec30/_data",
+                "Destination": "/myvol",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+
+          :
+]
+
+$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── c554daafe4b231f71864f68601d32c336a3952c87121e768bf501c77d937ec30
+│   └── _data
+│       ├── container1
+│       └── df
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+└── metadata.db
+
+4 directories, 4 files
+
+
+$ docker rm -v container1
+container1
+$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+└── metadata.db
+
+$ docker run -it -v /myvol -v /tmp/container1:/web/log --name container1 busybox /bin/sh
+/ # df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mapper/docker-253:0-1199259-73b87ad1573a1505ead45c614f1478b50df84a2b7c51d8945710860c0ea77a6e
+                      10474496     34972  10439524   0% /
+tmpfs                    65536         0     65536   0% /dev
+tmpfs                  1940700         0   1940700   0% /sys/fs/cgroup
+/dev/mapper/cl-root   52403200   7379448  45023752  14% /myvol
+/dev/mapper/cl-root   52403200   7379448  45023752  14% /web/log
+/dev/mapper/cl-root   52403200   7379448  45023752  14% /etc/resolv.conf
+/dev/mapper/cl-root   52403200   7379448  45023752  14% /etc/hostname
+/dev/mapper/cl-root   52403200   7379448  45023752  14% /etc/hosts
+shm                      65536         0     65536   0% /dev/shm
+tmpfs                    65536         0     65536   0% /proc/kcore
+tmpfs                    65536         0     65536   0% /proc/timer_list
+tmpfs                    65536         0     65536   0% /proc/timer_stats
+tmpfs                    65536         0     65536   0% /proc/sched_debug
+tmpfs                  1940700         0   1940700   0% /proc/scsi
+tmpfs                  1940700         0   1940700   0% /sys/firmware
+/ # ls /
+bin    dev    etc    home   myvol  proc   root   sys    tmp    usr    var    web
+/ # ls /web
+log
+/ # ls /web/log
+/ # echo logdata > /web/log/log-180222
+/ # echo container1 > /myvol/container1
+/ # exit
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+local               ddbcc2afa5e890cbf071fa61f98fccebc0200c81a028068ab1e3d5d6d4217bb1
+
+# tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+├── ddbcc2afa5e890cbf071fa61f98fccebc0200c81a028068ab1e3d5d6d4217bb1
+│   └── _data
+│       └── container1
+└── metadata.db
+
+$ tree /tmp/container1
+/tmp/container1
+└── log-180222
+
+$ cat /tmp/container1/log-180222
+logdata
+
+$ docker inspect container1
+[
+          :
+
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/tmp/container1",
+                "Destination": "/web/log",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "volume",
+                "Name": "ddbcc2afa5e890cbf071fa61f98fccebc0200c81a028068ab1e3d5d6d4217bb1",
+                "Source": "/var/lib/docker/volumes/ddbcc2afa5e890cbf071fa61f98fccebc0200c81a028068ab1e3d5d6d4217bb1/_data",
+                "Destination": "/myvol",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            }
+        ],
+
+          :
+]
+
+$ docker rm -v container1
+container1
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+
+$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+└── metadata.db
+
+$ tree /tmp/container1/
+/tmp/container1/
+└── log-180222
+
+$ docker run -it -v /myvol -v /tmp/data:/web/data --name volcontainer  busybox /bin/sh
+/ # df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mapper/docker-253:0-1199259-ac57945027474225868e9246f580be76e1b801d0f971724c60853d54e0d39980
+                      10474496     34992  10439504   0% /
+tmpfs                    65536         0     65536   0% /dev
+tmpfs                  1940700         0   1940700   0% /sys/fs/cgroup
+/dev/mapper/cl-root   52403200   7378592  45024608  14% /myvol
+/dev/mapper/cl-root   52403200   7378592  45024608  14% /web/data
+/dev/mapper/cl-root   52403200   7378592  45024608  14% /etc/resolv.conf
+/dev/mapper/cl-root   52403200   7378592  45024608  14% /etc/hostname
+/dev/mapper/cl-root   52403200   7378592  45024608  14% /etc/hosts
+shm                      65536         0     65536   0% /dev/shm
+tmpfs                    65536         0     65536   0% /proc/kcore
+tmpfs                    65536         0     65536   0% /proc/timer_list
+tmpfs                    65536         0     65536   0% /proc/timer_stats
+tmpfs                    65536         0     65536   0% /proc/sched_debug
+tmpfs                  1940700         0   1940700   0% /proc/scsi
+tmpfs                  1940700         0   1940700   0% /sys/firmware
+/ # echo "<h1> Hello world </h1>" > /web/data/index.html
+/ # echo volcontainer > /myvol/data1
+/ # ls /web/data/
+index.html
+/ # ls /myvol/
+data1
+/ # exit
+
+$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                     PORTS               NAMES
+99ee76601add        busybox             "/bin/sh"           2 minutes ago       Exited (0) 9 seconds ago                       volcontainer
+faa42bf0f116        busybox             "/bin/sh"           4 hours ago         Exited (0) 4 hours ago                         container2
+
+# docker run -it --volumes-from volcontainer --name container1 busybox /bin/sh
+/ # df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mapper/docker-253:0-1199259-a7ba4537bcc0eb5917f1d33516491e2ba706f296a5002df9c4b77bae354a10d3
+                      10474496     34992  10439504   0% /
+tmpfs                    65536         0     65536   0% /dev
+tmpfs                  1940700         0   1940700   0% /sys/fs/cgroup
+/dev/mapper/cl-root   52403200   7384596  45018604  14% /myvol
+/dev/mapper/cl-root   52403200   7384596  45018604  14% /web/data
+/dev/mapper/cl-root   52403200   7384596  45018604  14% /etc/resolv.conf
+/dev/mapper/cl-root   52403200   7384596  45018604  14% /etc/hostname
+/dev/mapper/cl-root   52403200   7384596  45018604  14% /etc/hosts
+shm                      65536         0     65536   0% /dev/shm
+tmpfs                    65536         0     65536   0% /proc/kcore
+tmpfs                    65536         0     65536   0% /proc/timer_list
+tmpfs                    65536         0     65536   0% /proc/timer_stats
+tmpfs                    65536         0     65536   0% /proc/sched_debug
+tmpfs                  1940700         0   1940700   0% /proc/scsi
+tmpfs                  1940700         0   1940700   0% /sys/firmware
+/ # ls /myvol
+data1
+/ # ls /web/data
+index.html
+/ # cat /web/data/index.html
+<h1> Hello world </h1>
+/ # exit
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+
+$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c
+│   └── _data
+│       └── data1
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+└── metadata.db
+
+$ tree /tmp/data/
+/tmp/data/
+└── index.html
+
+
+$ docker inspect container1
+[
+         :
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c",
+                "Source": "/var/lib/docker/volumes/c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c/_data",
+                "Destination": "/myvol",
+                "Driver": "local",
+                "Mode": "",
+                "RW": true,
+                "Propagation": ""
+            },
+            {
+                "Type": "bind",
+                "Source": "/tmp/data",
+                "Destination": "/web/data",
+                "Mode": "",
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+         :
+]
+
+
+$ docker rm -v volcontainer
+volcontainer
+
+$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                      PORTS               NAMES
+141dfd84fe84        busybox             "/bin/sh"           17 minutes ago      Exited (0) 16 minutes ago                       container1
+faa42bf0f116        busybox             "/bin/sh"           4 hours ago         Exited (0) 4 hours ago                          container2
+
+$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c
+│   └── _data
+│       └── data1
+├── cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+│   └── _data
+│       └── container2
+└── metadata.db
+
+4 directories, 3 files
+
+$ docker start container1
+container1
+
+$ docker attach container1
+/ # df
+Filesystem           1K-blocks      Used Available Use% Mounted on
+/dev/mapper/docker-253:0-1199259-a7ba4537bcc0eb5917f1d33516491e2ba706f296a5002df9c4b77bae354a10d3
+                      10474496     34972  10439524   0% /
+tmpfs                    65536         0     65536   0% /dev
+tmpfs                  1940700         0   1940700   0% /sys/fs/cgroup
+/dev/mapper/cl-root   52403200   7379504  45023696  14% /myvol
+/dev/mapper/cl-root   52403200   7379504  45023696  14% /web/data
+/dev/mapper/cl-root   52403200   7379504  45023696  14% /etc/resolv.conf
+/dev/mapper/cl-root   52403200   7379504  45023696  14% /etc/hostname
+/dev/mapper/cl-root   52403200   7379504  45023696  14% /etc/hosts
+shm                      65536         0     65536   0% /dev/shm
+tmpfs                    65536         0     65536   0% /proc/kcore
+tmpfs                    65536         0     65536   0% /proc/timer_list
+tmpfs                    65536         0     65536   0% /proc/timer_stats
+tmpfs                    65536         0     65536   0% /proc/sched_debug
+tmpfs                  1940700         0   1940700   0% /proc/scsi
+tmpfs                  1940700         0   1940700   0% /sys/firmware
+/ # ls /myvol
+data1
+/ # cat /myvol/data1
+volcontainer
+/ # exit
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               c8afd2e096985abb0ad75354007ef834255413f350ad94d4744bff4e761bd13c
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+
+$ docker rm -v container1
+container1
+
+$ docker volume ls
+DRIVER              VOLUME NAME
+local               cfc0c891b174bbfa68a57bab3dad56f98f3542716b1dbbd4921d5fa3a220fc31
+
+

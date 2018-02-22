@@ -1,0 +1,146 @@
+$ yum -y install epel-release
+読み込んだプラグイン:fastestmirror, langpacks
+Loading mirror speeds from cached hostfile
+ * base: ftp.iij.ad.jp
+ * extras: ftp.iij.ad.jp
+ * updates: centos.usonyx.net
+依存性の解決をしています
+--> トランザクションの確認を実行しています。
+---> パッケージ epel-release.noarch 0:7-9 を インストール
+--> 依存性解決を終了しました。
+
+依存性を解決しました
+
+================================================================================================================================================================
+ Package                                    アーキテクチャー                     バージョン                          リポジトリー                          容量
+================================================================================================================================================================
+インストール中:
+ epel-release                               noarch                               7-9                                 extras                                14 k
+
+トランザクションの要約
+================================================================================================================================================================
+インストール  1 パッケージ
+
+総ダウンロード容量: 14 k
+インストール容量: 24 k
+Downloading packages:
+epel-release-7-9.noarch.rpm                                                                                                              |  14 kB  00:00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  インストール中          : epel-release-7-9.noarch                                                                                                         1/1 
+  検証中                  : epel-release-7-9.noarch                                                                                                         1/1 
+
+インストール:
+  epel-release.noarch 0:7-9                                                                                                                                     
+
+完了しました!
+$ yum -y install docker-registry python-sqlalchemy
+読み込んだプラグイン:fastestmirror, langpacks
+epel/x86_64/metalink                                                                                                                     | 7.5 kB  00:00:00     
+epel                                                                                                                                     | 4.7 kB  00:00:00     
+(1/3): epel/x86_64/group_gz                                                                                                              | 266 kB  00:00:02     
+(2/3): epel/x86_64/updateinfo                                                                                                            | 882 kB  00:00:03     
+(3/3): epel/x86_64/primary_db                                                                                                            | 6.2 MB  00:00:46     
+Loading mirror speeds from cached hostfile
+ * base: ftp.iij.ad.jp
+ * epel: epel.scopesky.iq
+ * extras: ftp.iij.ad.jp
+ * updates: centos.usonyx.net
+パッケージ docker-registry は docker-distribution によって不要になりました。代わりに docker-distribution-2.6.2-1.git48294d9.el7.x86_64 のインストールを試みています。
+依存性の解決をしています
+--> トランザクションの確認を実行しています。
+---> パッケージ docker-distribution.x86_64 0:2.6.2-1.git48294d9.el7 を インストール
+---> パッケージ python-sqlalchemy.x86_64 0:0.9.8-2.el7 を インストール
+--> 依存性解決を終了しました。
+
+依存性を解決しました
+
+================================================================================================================================================================
+ Package                                     アーキテクチャー               バージョン                                     リポジトリー                    容量
+================================================================================================================================================================
+インストール中:
+ docker-distribution                         x86_64                         2.6.2-1.git48294d9.el7                         extras                         3.5 M
+ python-sqlalchemy                           x86_64                         0.9.8-2.el7                                    base                           2.9 M
+
+トランザクションの要約
+================================================================================================================================================================
+インストール  2 パッケージ
+
+総ダウンロード容量: 6.4 M
+インストール容量: 33 M
+Downloading packages:
+(1/2): docker-distribution-2.6.2-1.git48294d9.el7.x86_64.rpm                                                                             | 3.5 MB  00:00:02     
+(2/2): python-sqlalchemy-0.9.8-2.el7.x86_64.rpm                                                                                          | 2.9 MB  00:00:05     
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+合計                                                                                                                            1.2 MB/s | 6.4 MB  00:00:05     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  インストール中          : python-sqlalchemy-0.9.8-2.el7.x86_64                                                                                            1/2 
+  インストール中          : docker-distribution-2.6.2-1.git48294d9.el7.x86_64                                                                               2/2 
+  検証中                  : docker-distribution-2.6.2-1.git48294d9.el7.x86_64                                                                               1/2 
+  検証中                  : python-sqlalchemy-0.9.8-2.el7.x86_64                                                                                            2/2 
+
+インストール:
+  docker-distribution.x86_64 0:2.6.2-1.git48294d9.el7                                   python-sqlalchemy.x86_64 0:0.9.8-2.el7                                  
+
+完了しました!
+
+-------------------------------------
+$ sudo yum install docker-distribution
+$ sudo systemctl start docker-distribution.service
+$ sudo systemctl enable docker-distribution.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker-distribution.service to /usr/lib/systemd/system/docker-distribution.service.
+
+$ cat /etc/docker-distribution/registry/config.yml 
+version: 0.1
+log:
+  fields:
+    service: registry
+storage:
+    cache:
+        layerinfo: inmemory
+    filesystem:
+        rootdirectory: /var/lib/registry
+http:
+    addr: :5000
+
+$ sudo cat << END >> /etc/sysconfig/docker
+INSECURE_REGISTRY='--insecure-registry localhost:5000'
+
+END
+
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+username/httpd      ver1.1              d61e53002ae5        17 minutes ago      317MB
+
+$ docker tag username/httpd:ver1.1 localhost:5000/httpd:ver1.1
+
+$ docker images
+REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE
+localhost:5000/httpd   ver1.1              d61e53002ae5        23 minutes ago      317MB
+username/httpd         ver1.1              d61e53002ae5        23 minutes ago      317MB
+
+$ docker push localhost:5000/httpd:ver1.1
+The push refers to a repository [localhost:5000/httpd]
+ad513bfa9bb1: Pushed 
+8bda03a23eb3: Pushed 
+c10ab51dc79a: Pushed 
+8553cb8cc82b: Pushed 
+f6fe4b6dd5e6: Pushed 
+ver1.1: digest: sha256:e26af60bdcd6a607a06a392c5910d4bd15269c2519f66b1199781cc565d5d988 size: 1362
+
+$ docker search localhost:5000/httpd
+Error response from daemon: Unexpected status code 404
+
+$ docker rmi localhost:5000/httpd:ver1.1
+Untagged: localhost:5000/httpd:ver1.1
+Untagged: localhost:5000/httpd@sha256:e26af60bdcd6a607a06a392c5910d4bd15269c2519f66b1199781cc565d5d988
+
+docker rmi localhost:5000/httpd:ver1.1
+Untagged: localhost:5000/httpd:ver1.1
+Untagged: localhost:5000/httpd@sha256:e26af60bdcd6a607a06a392c5910d4bd15269c2519f66b1199781cc565d5d988
+

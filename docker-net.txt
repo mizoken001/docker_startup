@@ -1,0 +1,224 @@
+$ docker run -it --name centos01 centos:6 /bin/bash
+
+$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+8cbd2492bb76        centos:6            "/bin/bash"         15 seconds ago      Up 14 seconds                           centos01
+
+$ docker inspect centos01
+
+$ docker network ls
+NETWORK ID          NAME                DRIVER              SCOPE
+4d77cf8951bd        bridge              bridge              local
+bf66aeb04768        host                host                local
+da1ab55d37a8        none                null                local
+
+$ docker network inspect bridge
+[
+    {
+        "Name": "bridge",
+        "Id": "4d77cf8951bd81f6e104b4d338ad39cce0985e83de46d8d82db2482c9303b16f",
+        "Created": "2018-02-13T09:29:26.583382195+09:00",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": [
+                {
+                    "Subnet": "172.17.0.0/16",
+                    "Gateway": "172.17.0.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "8cbd2492bb76939b8189c0f1fbdfdca39c233cfb1afccf47096083291b4a7044": {
+                "Name": "centos01",
+                "EndpointID": "4bd8b5035eecc1c78fc6e11dbde1cba24ae1761049233c8a09fcfcb573e7c867",
+                "MacAddress": "02:42:ac:11:00:02",
+                "IPv4Address": "172.17.0.2/16",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {
+            "com.docker.network.bridge.default_bridge": "true",
+            "com.docker.network.bridge.enable_icc": "true",
+            "com.docker.network.bridge.enable_ip_masquerade": "true",
+            "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+            "com.docker.network.bridge.name": "docker0",
+            "com.docker.network.driver.mtu": "1500"
+        },
+        "Labels": {}
+    }
+]
+
+$ brctl show
+bridge name	bridge id		STP enabled	interfaces
+docker0		8000.024205ae234f	no		vethaed93df
+virbr0		8000.525400394c84	yes		virbr0-nic
+
+
+$ docker run --name none_net_busybox --net=none -ti busybox /bin/sh
+ble to find image 'busybox:latest' locally
+latest: Pulling from library/busybox
+57310166fe88: Pull complete 
+Digest: sha256:1669a6aa7350e1cdd28f972ddad5aceba2912f589f19a090ac75b7083da748db
+Status: Downloaded newer image for busybox:latest
+
+/ # ifconfig
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/ # 
+
+$ docker network inspect none
+[
+    {
+        "Name": "none",
+        "Id": "da1ab55d37a8219617f8be2852296f989b40747b5cc65fd4196d743cdd20c2ca",
+        "Created": "0001-01-01T00:00:00Z",
+        "Scope": "local",
+        "Driver": "null",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": []
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "3125bdc1fcde6a036356cfeaeb5c910678dbb577af3cb9d6efb3daa443974504": {
+                "Name": "none_net_busybox",
+                "EndpointID": "da85612ba291c0cbc645b1d27092c3c2292e052fcc3489430c124a26654d00fe",
+                "MacAddress": "",
+                "IPv4Address": "",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+
+$ docker run --name host_net_busybox --net=host -ti busybox /bin/sh
+/ # ifconfig
+docker0   Link encap:Ethernet  HWaddr 02:42:05:AE:23:4F  
+          inet addr:172.17.0.1  Bcast:0.0.0.0  Mask:255.255.0.0
+          inet6 addr: fe80::42:5ff:feae:234f/64 Scope:Link
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:29598 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:49252 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:1670320 (1.5 MiB)  TX bytes:66395198 (63.3 MiB)
+
+eth0      Link encap:Ethernet  HWaddr 52:54:00:AD:8E:68  
+          inet addr:192.168.100.14  Bcast:192.168.100.255  Mask:255.255.255.0
+          inet6 addr: fe80::4ef1:d4ae:24a6:7d54/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:1132349 errors:0 dropped:14 overruns:0 frame:0
+          TX packets:444378 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:1132616158 (1.0 GiB)  TX bytes:30991676 (29.5 MiB)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          inet6 addr: ::1/128 Scope:Host
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:15162 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:15162 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:118600414 (113.1 MiB)  TX bytes:118600414 (113.1 MiB)
+
+virbr0    Link encap:Ethernet  HWaddr 52:54:00:39:4C:84  
+          inet addr:192.168.122.1  Bcast:192.168.122.255  Mask:255.255.255.0
+          UP BROADCAST MULTICAST  MTU:1500  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/ # 
+
+$ docker network inspect host
+[
+    {
+        "Name": "host",
+        "Id": "bf66aeb04768e0ac4f38fe2f43fafb81070131ff54d2d60edaa163b07c60b614",
+        "Created": "0001-01-01T00:00:00Z",
+        "Scope": "local",
+        "Driver": "host",
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": null,
+            "Config": []
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Containers": {
+            "29b471faec1d41e002299605803cf0a1355f611c78806a7b705fc96d6b6977f7": {
+                "Name": "host_net_busybox",
+                "EndpointID": "52adb65f3344e4ea0e07af4caa59cb18e707e55886a71cf2799a9dab73584c82",
+                "MacAddress": "",
+                "IPv4Address": "",
+                "IPv6Address": ""
+            }
+        },
+        "Options": {},
+        "Labels": {}
+    }
+]
+
+$ ifconfig eth0
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 192.168.100.14  netmask 255.255.255.0  broadcast 192.168.100.255
+        inet6 fe80::4ef1:d4ae:24a6:7d54  prefixlen 64  scopeid 0x20<link>
+        ether 52:54:00:ad:8e:68  txqueuelen 1000  (Ethernet)
+        RX packets 1132873  bytes 1132645774 (1.0 GiB)
+        RX errors 0  dropped 14  overruns 0  frame 0
+        TX packets 444464  bytes 30999129 (29.5 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+$ docker run --name bridge_net_busybox -ti busybox /bin/sh
+/ # ifconfig
+eth0      Link encap:Ethernet  HWaddr 02:42:AC:11:00:02  
+          inet addr:172.17.0.2  Bcast:0.0.0.0  Mask:255.255.0.0
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:7 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:0 
+          RX bytes:578 (578.0 B)  TX bytes:0 (0.0 B)
+
+lo        Link encap:Local Loopback  
+          inet addr:127.0.0.1  Mask:255.0.0.0
+          UP LOOPBACK RUNNING  MTU:65536  Metric:1
+          RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1 
+          RX bytes:0 (0.0 B)  TX bytes:0 (0.0 B)
+
+/ # 
+

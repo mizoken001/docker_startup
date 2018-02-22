@@ -1,0 +1,70 @@
+$  docker build -t username/httpd:ver1.1 ~/httpd_dir
+ending build context to Docker daemon  3.072kB
+Step 1/7 : FROM enakai00/centos:centos6
+ ---> b8c94c5d2d7c
+Step 2/7 : MAINTAINER Toshiba Tarou
+ ---> Using cache
+ ---> 6271244992c9
+Step 3/7 : RUN echo "proxy=http://proxy.toshiba.co.jp:8080/" >> /etc/yum.conf
+ ---> Using cache
+ ---> 76167459399a
+Step 4/7 : RUN echo "proxy=https://proxy.toshiba.co.jp:8080/" >> /etc/yum.conf
+ ---> Using cache
+ ---> 9fd098879322
+Step 5/7 : RUN yum -y install httpd
+ ---> Using cache
+ ---> 7533bb78c3a8
+Step 6/7 : ADD index.html /var/www/html/index.html
+ ---> ba136b742c11
+Step 7/7 : CMD service httpd start && bash
+ ---> Running in 5cf0b884daad
+ ---> a2147119bac6
+Removing intermediate container 5cf0b884daad
+Successfully built a2147119bac6
+Successfully tagged username/httpd:ver1.1
+
+$ docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+username/httpd      ver1.1              a2147119bac6        11 minutes ago      289MB
+ubuntu              latest              00fd29ccc6f1        2 months ago        111MB
+hello-world         latest              f2a91732366c        3 months ago        1.85kB
+enakai00/centos     centos6             b8c94c5d2d7c        2 years ago         203MB
+enakai00/centos     centos7             3bd78cf8ed76        2 years ago         172MB
+enakai00/centos     latest              3bd78cf8ed76        2 years ago         172MB
+
+$ docker run -itd -p 8000:80 --name http01 username/httpd:ver1.1
+8349e330652f755bba6616b6b9b7e63a4b82e0e34e60b1841cd4482e226b3d98
+
+$ docker ps -l
+CONTAINER ID        IMAGE                   COMMAND                  CREATED              STATUS              PORTS                  NAMES
+8349e330652f        username/httpd:ver1.1   "/bin/sh -c 'servi..."   About a minute ago   Up About a minute   0.0.0.0:8000->80/tcp   http01
+
+$ docker top http01 | unexpand -t20
+UID	PID	PPID	C	STIME	TTY	TIME	CMD
+root	2430	2403	0	10:13	pts/0	00:00:00	/bin/sh -c service httpd start && bash
+root	2476	2430	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2478	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2479	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+root	2480	2430	0	10:13	pts/0	00:00:00	bash
+apache	2481	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2482	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2483	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2484	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2485	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+apache	2486	2476	0	10:13	?	00:00:00	/usr/sbin/httpd
+
+$ curl http://localhost:8000
+<h1> Hello World </h1>
+
+$ docker logs http01
+Starting httpd: httpd: Could not reliably determine the server's fully qualified domain name, using 172.17.0.2 for ServerName
+
+$ docker stop http01
+http01
+
+$ docker rm http01
+http01
+
+$ docker ps -a
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+
